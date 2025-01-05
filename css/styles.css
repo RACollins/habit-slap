@@ -1,0 +1,87 @@
+.main-signup {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: var(--background-color);
+    padding: 1rem;
+}
+
+.main-signup h1 {
+    margin-bottom: 1rem;
+    font-size: 2.5rem;
+}
+
+.main-signup p {
+    margin-bottom: 2rem;
+}
+
+.main-signup form {
+    max-width: 400px;
+    width: 100%;
+}
+
+.main-signup .small {
+    font-size: 0.875rem;
+    opacity: 0.8;
+}
+
+/* Arrow styling */
+.scroll-arrow {
+    font-size: 2rem;
+    text-decoration: none;
+    margin-top: 2rem;
+    animation: bounce 2s infinite;
+    color: var(--primary);
+}
+
+/* Smooth scrolling for the whole page */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Bounce animation for the arrow */
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {
+        transform: translateY(0);
+    }
+    40% {
+        transform: translateY(-20px);
+    }
+    60% {
+        transform: translateY(-10px);
+    }
+}
+
+/* How It Works section styling */
+#how-it-works {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+#how-it-works article {
+    text-align: center;
+    padding: 1.5rem;
+}
+
+#how-it-works header,
+#how-it-works footer {
+    text-align: center;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+#how-it-works p {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 1rem 0;
+    color: var(--primary);
+}
+
+/* Optional: Add some spacing between cards */
+#how-it-works .grid {
+    gap: 2rem;
+    padding: 2rem 0;
+} 
