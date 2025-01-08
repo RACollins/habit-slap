@@ -84,4 +84,11 @@ html {
 #how-it-works .grid {
     gap: 2rem;
     padding: 2rem 0;
+}
+
+/* Error message styling */
+.error-message {
+    color: var(--form-element-invalid-border-color);
+    font-size: 0.875rem;
+    margin-top: 1rem;
 } 
