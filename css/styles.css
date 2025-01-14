@@ -91,4 +91,97 @@ html {
     color: var(--form-element-invalid-border-color);
     font-size: 0.875rem;
     margin-top: 1rem;
+}
+
+/* Dashboard specific styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* Plan text styling */
+article p:first-of-type {
+    color: var(--muted-color);
+    margin-bottom: 2rem;
+}
+
+/* Section headers */
+article h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+/* Email notification section */
+details {
+    margin-bottom: 2rem;
+}
+
+details summary {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
+    border: 1px solid var(--muted-border-color);
+}
+
+details summary:hover {
+    background-color: var(--secondary-hover);
+}
+
+details[open] summary {
+    margin-bottom: 1rem;
+}
+
+/* Goal textarea */
+textarea {
+    width: 100%;
+    min-height: 100px;
+    margin-bottom: 2rem;
+}
+
+/* Button grid */
+article .grid:last-child {
+    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+/* Remove the previous grid columns media query since we're using flex */
+@media (min-width: 768px) {
+    article .grid:not(:last-child) {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Align text in grid header */
+article .grid:first-child {
+    align-items: center;
+}
+
+/* Style the date input */
+input[type="date"] {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* Style the email notification text */
+details .group {
+    margin: 0;
+}
+
+details .group span:first-child {
+    font-weight: bold;
+}
+
+/* Style the logout link */
+article .grid a[href="/logout"] {
+    color: var(--muted-color);
+    text-decoration: none;
+}
+
+article .grid a[href="/logout"]:hover {
+    text-decoration: underline;
 } 

@@ -1,6 +1,12 @@
 from fasthtml.common import *
 import secrets
 from datetime import datetime, timedelta
+import yagmail
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 from components import TopBar
 from pages.landing import LandingPage
@@ -19,7 +25,10 @@ CREATE TABLE IF NOT EXISTS users (
    email TEXT PRIMARY KEY NOT NULL,
    magic_link_token TEXT,
    magic_link_expiry TIMESTAMP,
-   is_active BOOLEAN DEFAULT FALSE
+   is_active BOOLEAN DEFAULT FALSE,
+   next_email_date TEXT,
+   goal TEXT,
+   plan TEXT DEFAULT 'free'
 );
 """
 
@@ -71,12 +80,11 @@ def get():
 
 
 def send_magic_link_email(email: str, magic_link: str):
+    # Get credentials from environment variables
+    sender_email = os.getenv("GMAIL_USER")
+    sender_password = os.getenv("GMAIL_PASSWORD")
 
     email_content = f"""
-    To: {email}
-    Subject: Sign in to The App
-    ============================
-  
     Hi there,
   
     Click this link to sign in to The App: {magic_link}
@@ -86,8 +94,17 @@ def send_magic_link_email(email: str, magic_link: str):
     Cheers,
     The Habit Slap Team
     """
-    # Mock email sending by printing to console
-    print(email_content)
+
+    # Initialize yagmail SMTP client
+    yag = yagmail.SMTP(sender_email, sender_password)
+
+    try:
+        # Send email
+        yag.send(to=email, subject="Sign in to The App", contents=email_content)
+    except Exception as e:
+        print(f"Failed to send email: {str(e)}")
+    finally:
+        yag.close()
 
 
 @rt("/send_magic_link")
@@ -164,7 +181,17 @@ def post(session):
 @rt("/dashboard")
 def get(session):
     u = users[session["auth"]]
-    return Title("Dashboard"), Container(TopBar(), Dashboard(u.email))
+    return Title("Dashboard"), Container(TopBar(), Dashboard(u))
+
+
+@rt("/save_details")
+def post(session, next_email_date: str, goal: str):
+    email = session["auth"]
+    try:
+        users.update({"email": email, "next_email_date": next_email_date, "goal": goal})
+        return RedirectResponse("/dashboard", status_code=303)
+    except Exception as e:
+        return f"Error saving details: {str(e)}"
 
 
 if __name__ == "__main__":
