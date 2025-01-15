@@ -1,3 +1,11 @@
+/* Add these global placeholder styles near the top of the file */
+::placeholder,
+textarea::placeholder,
+input::placeholder {
+    color: #C8C8C8;
+    font-style: italic;
+}
+
 .main-signup {
     min-height: 100vh;
     display: flex;
@@ -84,4 +92,146 @@ html {
 #how-it-works .grid {
     gap: 2rem;
     padding: 2rem 0;
+}
+
+/* Error message styling */
+.error-message {
+    color: var(--form-element-invalid-border-color);
+    font-size: 0.875rem;
+    margin-top: 1rem;
+}
+
+/* Dashboard specific styles */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+/* Plan text styling */
+article p:first-of-type {
+    color: var(--muted-color);
+    margin-bottom: 2rem;
+}
+
+/* Section headers */
+article h2 {
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+/* Email notification section */
+details {
+    margin-bottom: 2rem;
+}
+
+details summary {
+    cursor: pointer;
+    padding: 0.75rem 1rem;
+    border-radius: var(--border-radius);
+    background-color: var(--background-color);
+    border: 1px solid var(--muted-border-color);
+}
+
+details summary:hover {
+    background-color: var(--secondary-hover);
+}
+
+details[open] summary {
+    margin-bottom: 1rem;
+}
+
+/* Goal textarea */
+textarea {
+    width: 100%;
+    min-height: 100px;
+    margin-bottom: 2rem;
+}
+
+/* Button grid */
+article .grid:last-child {
+    gap: 1rem;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+/* Remove the previous grid columns media query since we're using flex */
+@media (min-width: 768px) {
+    article .grid:not(:last-child) {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+/* Align text in grid header */
+article .grid:first-child {
+    align-items: center;
+}
+
+/* Style the date input */
+input[type="date"] {
+    width: 100%;
+    margin-top: 0.5rem;
+}
+
+/* Style the email notification text */
+details .group {
+    margin: 0;
+}
+
+details .group span:first-child {
+    font-weight: bold;
+}
+
+/* Style the logout link */
+article .grid a[href="/logout"] {
+    color: var(--muted-color);
+    text-decoration: none;
+}
+
+article .grid a[href="/logout"]:hover {
+    text-decoration: underline;
 } 
+
+/* styles.css */
+#email::placeholder {
+    /* Remove this block since it's now handled by the global style */
+}
+
+/* Add styles for centered, auto-width buttons */
+.main-signup form button[type="submit"] {
+    width: auto;
+    min-width: 200px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Update article form button styling for consistency across all forms */
+article form button[type="submit"] {
+    width: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    min-width: 200px;
+}
+
+/* If you have grid buttons that should remain full width, you can override with: */
+article .grid button[type="submit"] {
+    width: 100%;
+}
+
+/* Update the button styling to ensure centering */
+article form button[type="submit"]:not(.grid button) {
+    width: auto;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    min-width: 200px;
+    margin: 0 auto;
+    display: block;
+}
+
+/* Style datetime input when empty */
+input[type="datetime-local"]:not(:valid) {
+    color: #C8C8C8;
+    font-style: italic;
+}

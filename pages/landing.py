@@ -26,32 +26,6 @@ def CustomStyle():
     )
 
 
-def ThemeToggle():
-    return Div(
-        Span("🌙"),  # Moon icon
-        Input(
-            type="checkbox",
-            role="switch",
-            onclick="document.documentElement.setAttribute('data-theme', document.documentElement.getAttribute('data-theme') === 'light' ? 'dark' : 'light')",
-        ),
-        Span("☀️"),  # Sun icon
-        cls="theme-switch",
-    )
-
-
-def TopBar():
-    return Nav(
-        Ul(
-            Li(Strong("Habit Slap")),
-        ),
-        Ul(
-            Li(ThemeToggle()),
-            Li(A("Login", href="#")),
-            Li(A("Sign Up", href="#")),
-        ),
-    )
-
-
 def MainSignUp():
     return Container(
         Article(
@@ -60,18 +34,7 @@ def MainSignUp():
                 "Motivational emails that hit you like a slap in the face ✋💥",
                 cls="text-center",
             ),
-            Form(
-                Group(
-                    Input(
-                        type="email",
-                        placeholder="Enter your email",
-                        required=True,
-                        aria_invalid=True,
-                    ),
-                    Button("Subscribe", type="submit"),
-                ),
-                cls="text-center",
-            ),
+            A(Button("Get Started", type="button"), href="/login", cls="text-center"),
             P("Scroll down to learn more", cls="text-center small"),
             A("↓", href="#how-it-works", cls="scroll-arrow"),
             cls="main-signup",
@@ -127,7 +90,6 @@ def HowItWorks():
 def LandingPage():
     return Div(
         # CustomStyle(),
-        TopBar(),
         MainSignUp(),
         HowItWorks(),
     )
