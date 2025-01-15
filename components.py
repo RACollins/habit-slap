@@ -22,6 +22,5 @@ def TopBar():
         Ul(
             # Li(ThemeToggle()),
             Li(A("Login", href="/login")),
-            Li(A("Sign Up", href="#")),
         ),
     )

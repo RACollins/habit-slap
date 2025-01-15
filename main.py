@@ -5,17 +5,15 @@ import yagmail
 import os
 from dotenv import load_dotenv
 
-# Load environment variables
+### Load environment variables
 load_dotenv()
 
 from components import TopBar
 from pages.landing import LandingPage
 from pages.login import MagicLinkForm
 from pages.dashboard import Dashboard
+from pages.signup import SignupForm
 
-
-### Set head elements
-css_styles = Link(rel="stylesheet", href="/css/styles.css", type="text/css")
 
 ### Initialize database
 db = database("data/users_magic_link.db")
@@ -58,8 +56,13 @@ bware = Beforeware(
         "/login",
         "/send_magic_link",
         r"/verify_magic_link/.*",
+        "/signup",
+        "/complete_signup",
     ],
 )
+
+### Set head elements
+css_styles = Link(rel="stylesheet", href="/css/styles.css", type="text/css")
 
 
 ### Set up FastHTML app
@@ -75,7 +78,7 @@ def get():
 @rt("/login")
 def get():
     return Title("login"), Container(
-        TopBar(), MagicLinkForm("Sign In with Email", "/send_magic_link")
+        TopBar(), MagicLinkForm("Log in", "/send_magic_link")
     )
 
 
@@ -136,9 +139,9 @@ def post(email: str):
     send_magic_link_email(email, magic_link)
 
     return (
-        P(
-            "A link to sign in has been sent to your email. Please check your inbox. The link will expire in 15 minutes.",
-            id="success",
+        Div(
+            P("Check your inbox. Link will expire in 15 minutes.", style="text-align: center"),
+            style="text-align: center",
         ),
         HttpHeader("HX-Reswap", "outerHTML"),
         Button(
@@ -167,6 +170,8 @@ def get(session, token: str):
                 "is_active": True,
             }
         )
+        if not user.goal or not user.next_email_date:
+            return RedirectResponse("/signup")
         return RedirectResponse("/dashboard")
     except IndexError:
         return "Invalid or expired magic link"
@@ -186,6 +191,27 @@ def get(session):
 
 @rt("/save_details")
 def post(session, next_email_date: str, goal: str):
+    email = session["auth"]
+    try:
+        users.update({"email": email, "next_email_date": next_email_date, "goal": goal})
+        return RedirectResponse("/dashboard", status_code=303)
+    except Exception as e:
+        return f"Error saving details: {str(e)}"
+
+
+@rt("/signup")
+def get(session):
+    if not session.get("auth"):
+        return RedirectResponse("/login")
+    u = users[session["auth"]]
+    return Title("Complete Your Setup"), Container(TopBar(), SignupForm(u))
+
+
+@rt("/complete_signup")
+def post(session, next_email_date: str, goal: str):
+    if not session.get("auth"):
+        return RedirectResponse("/login")
+
     email = session["auth"]
     try:
         users.update({"email": email, "next_email_date": next_email_date, "goal": goal})
