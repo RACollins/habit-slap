@@ -162,6 +162,12 @@ def get(session, token: str):
 
 @rt("/logout")
 def post(session):
+    email = session["auth"]  # Get email before deleting from session
+    # Update user's active status to False
+    db.update_user(
+        email,
+        {"is_active": False}
+    )
     del session["auth"]
     return HttpHeader("HX-Redirect", "/login")
 
