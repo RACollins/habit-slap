@@ -7,7 +7,7 @@ def Dashboard(user):
             Grid(
                 H1("Dashboard"),
                 Div(
-                    P(f"Signed in as {user.email}", style="margin: 0"),
+                    P(f"Signed in as {user['email']}", style="margin: 0"),
                     A(
                         "Not you? logout",
                         href="#",
@@ -19,7 +19,7 @@ def Dashboard(user):
             ),
             Div(
                 P(
-                    f"Plan: {user.plan or 'free'}",
+                    f"Plan: {user.get('plan') or 'free'}",
                     style="margin-top: 1rem; margin-bottom: 0",
                 ),
                 A(
@@ -33,20 +33,20 @@ def Dashboard(user):
             Details(
                 Summary("Show email schedule", role="button", cls="outline"),
                 Div(
-                    Span(f"Next email: {user.next_email_date or 'Not scheduled'}"),
+                    Span(f"Next email: {user.get('next_email_date') or 'Not scheduled'}"),
                 ),
             ),
             Form(
                 H2("Adjust your email schedule", style="margin-top: 1rem"),
                 Input(
                     type="datetime-local",
-                    value=user.next_email_date or "",
+                    value=user.get("next_email_date") or "",
                     name="next_email_date",
                     style="margin-top: 1rem; margin-bottom: 2rem",
                 ),
                 H2("Adjust your goal", style="margin-top: 1rem"),
                 Textarea(
-                    user.goal or "Set your goal...",
+                    user.get("goal") or "Set your goal...",
                     rows=4,
                     style="margin-bottom: 1rem",
                     name="goal",

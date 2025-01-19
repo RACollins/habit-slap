@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 import yagmail
 import os
 from dotenv import load_dotenv
+from database.dynamo_handler import DynamoHandler
 
 ### Load environment variables
 load_dotenv()
@@ -16,23 +17,7 @@ from pages.signup import SignupForm
 
 
 ### Initialize database
-db = database("data/users_magic_link.db")
-
-SQL_CREATE_USERS = """
-CREATE TABLE IF NOT EXISTS users (
-   email TEXT PRIMARY KEY NOT NULL,
-   magic_link_token TEXT,
-   magic_link_expiry TIMESTAMP,
-   is_active BOOLEAN DEFAULT FALSE,
-   next_email_date TEXT,
-   goal TEXT,
-   plan TEXT DEFAULT 'free'
-);
-"""
-
-db.execute(SQL_CREATE_USERS)
-users = db.t.users
-User = users.dataclass()
+db = DynamoHandler()
 
 
 ### Set up beforeware
@@ -115,32 +100,36 @@ def post(email: str):
     if not email:
         return "Email is required"
 
-    try:
-        user = users[email]
-    except NotFoundError:
-        user = User(
-            email=email, is_active=False, magic_link_token=None, magic_link_expiry=None
-        )
-        users.insert(user)
+    user = db.get_user(email)
+    if not user:
+        user = {
+            "email": email,
+            "is_active": False,
+            "magic_link_token": None,
+            "magic_link_expiry": None,
+        }
+        db.create_user(user)
 
     magic_link_token = secrets.token_urlsafe(32)
     magic_link_expiry = datetime.now() + timedelta(minutes=15)
 
-    users.update(
+    db.update_user(
+        email,
         {
-            "email": email,
             "magic_link_token": magic_link_token,
-            "magic_link_expiry": magic_link_expiry,
-        }
+            "magic_link_expiry": magic_link_expiry.isoformat(),
+        },
     )
 
     magic_link = f"http://0.0.0.0:5001/verify_magic_link/{magic_link_token}"
-
     send_magic_link_email(email, magic_link)
 
     return (
         Div(
-            P("Check your inbox. Link will expire in 15 minutes.", style="text-align: center"),
+            P(
+                "Check your inbox. Link will expire in 15 minutes.",
+                style="text-align: center",
+            ),
             style="text-align: center",
         ),
         HttpHeader("HX-Reswap", "outerHTML"),
@@ -157,43 +146,43 @@ def post(email: str):
 @rt("/verify_magic_link/{token}")
 def get(session, token: str):
     now = datetime.now()
-    try:
-        user = users(
-            where=f"magic_link_token = '{token}' AND magic_link_expiry > '{now}'"
-        )[0]
-        session["auth"] = user.email
-        users.update(
-            {
-                "email": user.email,
-                "magic_link_token": None,
-                "magic_link_expiry": None,
-                "is_active": True,
-            }
+    user = db.query_by_token(token)
+
+    if user and datetime.fromisoformat(user["magic_link_expiry"]) > now:
+        session["auth"] = user["email"]
+        db.update_user(
+            user["email"],
+            {"magic_link_token": None, "magic_link_expiry": None, "is_active": True},
         )
-        if not user.goal or not user.next_email_date:
+        if not user.get("goal") or not user.get("next_email_date"):
             return RedirectResponse("/signup")
         return RedirectResponse("/dashboard")
-    except IndexError:
-        return "Invalid or expired magic link"
+    return "Invalid or expired magic link"
 
 
 @rt("/logout")
 def post(session):
+    email = session["auth"]  # Get email before deleting from session
+    # Update user's active status to False
+    db.update_user(
+        email,
+        {"is_active": False}
+    )
     del session["auth"]
     return HttpHeader("HX-Redirect", "/login")
 
 
 @rt("/dashboard")
 def get(session):
-    u = users[session["auth"]]
-    return Title("Dashboard"), Container(TopBar(), Dashboard(u))
+    user = db.get_user(session["auth"])
+    return Title("Dashboard"), Container(TopBar(), Dashboard(user))
 
 
 @rt("/save_details")
 def post(session, next_email_date: str, goal: str):
     email = session["auth"]
     try:
-        users.update({"email": email, "next_email_date": next_email_date, "goal": goal})
+        db.update_user(email, {"next_email_date": next_email_date, "goal": goal})
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"
@@ -203,8 +192,8 @@ def post(session, next_email_date: str, goal: str):
 def get(session):
     if not session.get("auth"):
         return RedirectResponse("/login")
-    u = users[session["auth"]]
-    return Title("Complete Your Setup"), Container(TopBar(), SignupForm(u))
+    user = db.get_user(session["auth"])
+    return Title("Complete Your Setup"), Container(TopBar(), SignupForm(user))
 
 
 @rt("/complete_signup")
@@ -214,7 +203,7 @@ def post(session, next_email_date: str, goal: str):
 
     email = session["auth"]
     try:
-        users.update({"email": email, "next_email_date": next_email_date, "goal": goal})
+        db.update_user(email, {"next_email_date": next_email_date, "goal": goal})
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"
