@@ -1,6 +1,6 @@
 from fasthtml.common import *
 import secrets
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 import yagmail
 import os
 from dotenv import load_dotenv
@@ -111,7 +111,7 @@ def post(email: str):
         db.create_user(user)
 
     magic_link_token = secrets.token_urlsafe(32)
-    magic_link_expiry = datetime.now() + timedelta(minutes=15)
+    magic_link_expiry = datetime.now(timezone.utc) + timedelta(minutes=15)
 
     db.update_user(
         email,
@@ -145,7 +145,7 @@ def post(email: str):
 
 @rt("/verify_magic_link/{token}")
 def get(session, token: str):
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     user = db.query_by_token(token)
 
     if user and datetime.fromisoformat(user["magic_link_expiry"]) > now:
@@ -164,10 +164,7 @@ def get(session, token: str):
 def post(session):
     email = session["auth"]  # Get email before deleting from session
     # Update user's active status to False
-    db.update_user(
-        email,
-        {"is_active": False}
-    )
+    db.update_user(email, {"is_active": False})
     del session["auth"]
     return HttpHeader("HX-Redirect", "/login")
 
@@ -182,7 +179,13 @@ def get(session):
 def post(session, next_email_date: str, goal: str):
     email = session["auth"]
     try:
-        db.update_user(email, {"next_email_date": next_email_date, "goal": goal})
+        # Convert local datetime to UTC
+        local_dt = datetime.fromisoformat(next_email_date)
+        if local_dt.tzinfo is None:
+            local_dt = local_dt.astimezone()
+        utc_dt = local_dt.astimezone(timezone.utc)
+
+        db.update_user(email, {"next_email_date": utc_dt.isoformat(), "goal": goal})
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"
@@ -203,7 +206,13 @@ def post(session, next_email_date: str, goal: str):
 
     email = session["auth"]
     try:
-        db.update_user(email, {"next_email_date": next_email_date, "goal": goal})
+        # Convert local datetime to UTC
+        local_dt = datetime.fromisoformat(next_email_date)
+        if local_dt.tzinfo is None:
+            local_dt = local_dt.astimezone()
+        utc_dt = local_dt.astimezone(timezone.utc)
+
+        db.update_user(email, {"next_email_date": utc_dt.isoformat(), "goal": goal})
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"
