@@ -1,7 +1,17 @@
 from fasthtml.common import *
+from datetime import datetime, timezone
 
 
 def Dashboard(user):
+    # Convert UTC time to local time for display
+    next_email = user.get("next_email_date")
+    if next_email:
+        utc_dt = datetime.fromisoformat(next_email)
+        local_dt = utc_dt.astimezone()  # Converts to local timezone
+        next_email = local_dt.strftime(
+            "%Y-%m-%dT%H:%M"
+        )  # Format for datetime-local input
+
     return Container(
         Article(
             Grid(
@@ -33,14 +43,16 @@ def Dashboard(user):
             Details(
                 Summary("Show email schedule", role="button", cls="outline"),
                 Div(
-                    Span(f"Next email: {user.get('next_email_date') or 'Not scheduled'}"),
+                    Span(
+                        f"Next email: {local_dt.strftime('%Y-%m-%d %H:%M') if next_email else 'Not scheduled'}"
+                    ),
                 ),
             ),
             Form(
                 H2("Adjust your email schedule", style="margin-top: 1rem"),
                 Input(
                     type="datetime-local",
-                    value=user.get("next_email_date") or "",
+                    value=next_email or "",
                     name="next_email_date",
                     style="margin-top: 1rem; margin-bottom: 2rem",
                 ),
