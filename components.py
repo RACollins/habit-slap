@@ -24,3 +24,19 @@ def TopBar():
             Li(A("Login", href="/login")),
         ),
     )
+
+
+def TestimonialCard(text, author, username):
+    return Article(
+        Blockquote(
+            P(text),
+            Footer(
+                P(
+                    Strong(author),
+                    Br(),
+                    Em(f"@{username}"),
+                )
+            ),
+        ),
+        cls="testimonial-card",
+    )

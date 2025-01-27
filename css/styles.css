@@ -94,6 +94,17 @@ html {
     padding: 2rem 0;
 }
 
+/* FAQ section styling */
+#faq h2 {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+#faq p {
+    text-align: left;
+    padding: 2rem 1rem;
+}
+
 /* Error message styling */
 .error-message {
     color: var(--form-element-invalid-border-color);
@@ -234,4 +245,64 @@ article form button[type="submit"]:not(.grid button) {
 input[type="datetime-local"]:not(:valid) {
     color: #C8C8C8;
     font-style: italic;
+}
+
+/* Testimonial section styling */
+#testimonials h2 {
+    text-align: center;
+    padding: 2rem 1rem 0.5rem;
+}
+
+#testimonials .subtitle {
+    color: var(--pico-muted-color);
+    margin-bottom: 2rem;
+    font-size: 1.1rem;
+    text-align: center;
+}
+
+/* Testimonial card styling */
+.testimonial-card {
+    padding: 2rem;
+    border-radius: 8px;
+    background-color: var(--pico-card-background-color);
+    height: fit-content;  /* Allow card to fit its content */
+}
+
+.testimonial-card blockquote {
+    border-left: none;
+    padding: 0;
+    margin: 0;
+}
+
+.testimonial-card blockquote::before {
+    content: '"';
+    font-size: 4rem;
+    color: var(--pico-muted-color);
+    line-height: 1;
+    margin-bottom: -2rem;
+    display: block;
+}
+
+.testimonial-card footer {
+    margin-top: 1rem;
+    text-align: left;
+}
+
+.testimonial-card em {
+    color: var(--pico-muted-color);
+}
+
+/* Update the testimonials grid layout */
+#testimonials .grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    grid-auto-rows: min-content;  /* This allows rows to size based on content */
+    align-items: start;  /* This prevents stretching to match other items */
+}
+
+/* Make grid responsive - collapse to single column on mobile */
+@media (max-width: 768px) {
+    #testimonials .grid {
+        grid-template-columns: 1fr;  /* Single column on mobile */
+    }
 }

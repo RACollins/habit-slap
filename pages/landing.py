@@ -1,4 +1,5 @@
 from fasthtml.common import *
+from components import TestimonialCard
 
 
 # Add custom style to override Pico's default theme
@@ -29,7 +30,7 @@ def CustomStyle():
 def MainSignUp():
     return Container(
         Article(
-            H1("Habit Slap", cls="text-center"),
+            H1("Habit Slap"),
             P(
                 "Motivational emails that hit you like a slap in the face ✋💥",
                 cls="text-center",
@@ -64,13 +65,13 @@ def HowItWorks():
         },
         "step3": {
             "top": "Step 3",
-            "body": "🏅 Get Shit Done!",
+            "body": "🏅 Get Sh*t Done!",
             "bottom": "No more excuses! Build that habit! Attack your week! Also works well for quitting bad habits.",
         },
     }
     return Container(
         Div(
-            H2("How it Works", cls="text-center"),
+            H2("How it Works"),
             Div(
                 *[
                     HIWCard(
@@ -87,9 +88,86 @@ def HowItWorks():
     )
 
 
+def Testimonials():
+    testimonials = [
+        {
+            "text": "The daily motivation keeps me focused on my goals. "
+            "Simple but effective!",
+            "author": "Sarah Chen",
+            "username": "sarahcodes",
+        },
+        {
+            "text": "These are high-quality courses. Trust me. I own around 10 and the price is worth it for the content quality. @EducativeInc came at the right time in my career. I'm understanding topics better than with any book or online video tutorial I've done. Truly made for developers.",
+            "author": "Anthony Walker",
+            "username": "_webarchitect_",
+        },
+        {
+            "text": "I've tried many habit tracking apps, but the email slaps really make a difference. They're like having a friend who won't let you slack off.",
+            "author": "Mike Rodriguez",
+            "username": "mikedev",
+        },
+        {
+            "text": "These are high-quality courses. Trust me. I own around 10 and the price is worth it for the content quality. @EducativeInc came at the right time in my career. I'm understanding topics better than with any book or online video tutorial I've done. Truly made for developers.",
+            "author": "Anthony Walker",
+            "username": "_webarchitect_",
+        },
+        {
+            "text": "The daily motivation keeps me focused on my goals. Simple but effective!",
+            "author": "Sarah Chen",
+            "username": "sarahcodes",
+        },
+        {
+            "text": "I've tried many habit tracking apps, but the email slaps really make a difference. They're like having a friend who won't let you slack off.",
+            "author": "Mike Rodriguez",
+            "username": "mikedev",
+        },
+    ]
+
+    return Container(
+        Div(
+            H2("Testimonials"),
+            P("What our users are saying about us", cls="text-center subtitle"),
+            Div(
+                *[
+                    TestimonialCard(
+                        text=t["text"], author=t["author"], username=t["username"]
+                    )
+                    for t in testimonials
+                ],
+                cls="grid",
+            ),
+            id="testimonials",
+        )
+    )
+
+
+def FAQ():
+    faq_content = {
+        "What is this?": "This is a test",
+        "How does it work?": "This is a test",
+        "What is the catch?": "This is a test",
+        "What if I don't want to receive emails?": "This is a test",
+    }
+    return Container(
+        Div(
+            H2("FAQ"),
+            *[
+                Details(
+                    Summary(q, role="button", cls="outline"),
+                    P(a),
+                )
+                for q, a in faq_content.items()
+            ],
+            id="faq",
+        )
+    )
+
+
 def LandingPage():
     return Div(
         # CustomStyle(),
         MainSignUp(),
         HowItWorks(),
+        Testimonials(),
+        FAQ(),
     )
