@@ -102,7 +102,7 @@ html {
 
 #faq p {
     text-align: left;
-    padding: 2rem 1rem;
+    padding-left: 1rem;
 }
 
 /* Error message styling */
@@ -304,5 +304,103 @@ input[type="datetime-local"]:not(:valid) {
 @media (max-width: 768px) {
     #testimonials .grid {
         grid-template-columns: 1fr;  /* Single column on mobile */
+    }
+}
+
+/* Pricing section styling */
+#pricing {
+    text-align: center;
+    padding: 4rem 1rem;
+}
+
+#pricing .subtitle {
+    color: var(--muted-color);
+    margin-bottom: 3rem;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.pricing-card {
+    padding: 2rem;
+    border: 1px solid var(--muted-border-color);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: var(--background-color);
+}
+
+.pricing-card h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    color: var(--h3-color);
+}
+
+.pricing-card h2 {
+    font-size: 2.5rem;
+    margin: 1rem 0 2rem;
+}
+
+.pricing-period {
+    font-size: 1rem;
+    color: var(--muted-color);
+}
+
+.pricing-features {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    text-align: left;
+    width: 100%;
+}
+
+.pricing-features li {
+    margin-bottom: 1rem;
+    color: var(--muted-color);
+}
+
+.checkmark {
+    color: var(--primary);
+    margin-right: 0.5rem;
+}
+
+.pricing-card button {
+    width: 60%;
+    margin: auto auto 0;
+}
+
+.pricing-card > a {
+    width: 60%;
+    margin: 0 auto;
+    display: block;
+}
+
+.pricing-card > a button {
+    width: 100%;
+    margin: 0;
+}
+
+/* Style disabled buttons to match enabled ones */
+.pricing-card button:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Make pricing grid responsive */
+@media (max-width: 768px) {
+    .pricing-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .pricing-card {
+        max-width: 400px;
+        margin: 0 auto;
     }
 }
