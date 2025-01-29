@@ -47,11 +47,14 @@ bware = Beforeware(
 )
 
 ### Set head elements
-css_styles = Link(rel="stylesheet", href="/css/styles.css", type="text/css")
+css_styles = [
+    Link(rel="stylesheet", href="/css/styles.css", type="text/css"),
+    Script(src="/static/js/modal.js", defer=True),
+]
 
 
 ### Set up FastHTML app
-app, rt = fast_app(live=True, hdrs=[css_styles], before=bware)
+app, rt = fast_app(live=True, hdrs=css_styles, before=bware)
 
 
 ### Set up routes
@@ -107,6 +110,7 @@ def post(email: str):
             "is_active": False,
             "magic_link_token": None,
             "magic_link_expiry": None,
+            "tier": "free",  # Add default tier when creating user
         }
         db.create_user(user)
 
@@ -216,6 +220,22 @@ def post(session, next_email_date: str, goal: str):
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"
+
+
+@rt("/delete_account")
+def post(session):
+    if not session.get("auth"):
+        return RedirectResponse("/login")
+
+    email = session["auth"]
+    try:
+        # Delete the user from the database
+        db.delete_user(email)
+        # Clear the session
+        del session["auth"]
+        return HttpHeader("HX-Redirect", "/")
+    except Exception as e:
+        return f"Error deleting account: {str(e)}"
 
 
 if __name__ == "__main__":

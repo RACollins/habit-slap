@@ -68,3 +68,11 @@ class DynamoHandler:
         except Exception as e:
             print(f"Error querying by token: {str(e)}")
             return None
+
+    def delete_user(self, email: str) -> bool:
+        try:
+            self.table.delete_item(Key={"email": email})
+            return True
+        except Exception as e:
+            print(f"Error deleting user: {str(e)}")
+            return False
