@@ -125,7 +125,7 @@ def post(email: str):
         },
     )
 
-    magic_link = f"http://0.0.0.0:5001/verify_magic_link/{magic_link_token}"
+    magic_link = f"https://habit-slap.vercel.app/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
     return (
