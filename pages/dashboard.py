@@ -1,18 +1,20 @@
 from fasthtml.common import *
 from datetime import datetime, timezone, timedelta
 
+
 def get_next_sunday_midnight():
     today = datetime.now()
     days_until_sunday = (6 - today.weekday()) % 7
     # If it's Sunday, we want next Sunday unless it's exactly midnight
     if days_until_sunday == 0 and today.time() != datetime.min.time():
         days_until_sunday = 7
-    
+
     # Get next Sunday at midnight
     next_sunday = today + timedelta(days=days_until_sunday)
     # Set time to midnight (00:00:00)
     next_sunday = next_sunday.replace(hour=0, minute=0, second=0, microsecond=0)
     return next_sunday
+
 
 def Dashboard(user):
     # Convert UTC time to local time for display
@@ -26,6 +28,16 @@ def Dashboard(user):
 
     # Get next Sunday at midnight in local time
     max_date = get_next_sunday_midnight().strftime("%Y-%m-%dT%H:%M")
+
+    # Get tier-specific upgrade button text
+    upgrade_text = (
+        "Upgrade to Premium"
+        if user.get("tier") == "free"
+        else "Upgrade to Human"
+    )
+    show_upgrade = (
+        user.get("tier") != "human"
+    )  # Only show upgrade if not on highest tier
 
     return Container(
         Article(
@@ -44,13 +56,16 @@ def Dashboard(user):
             ),
             Div(
                 P(
-                    f"Plan: {user.get('plan') or 'free'}",
+                    f"Plan: {user.get('tier', 'free').capitalize()}",
                     style="margin-top: 1rem; margin-bottom: 0",
                 ),
                 A(
-                    "Upgrade to Premium",
-                    href="/#",
-                    style="font-size: 0.875rem",
+                    upgrade_text,
+                    href="#",
+                    style="font-size: 0.875rem; "
+                    + ("display: none;" if not show_upgrade else ""),
+                    data_target="upgrade-modal",
+                    onclick="toggleModal(event)",
                 ),
                 style="margin-bottom: 1rem",
             ),
@@ -83,10 +98,13 @@ def Dashboard(user):
                 Grid(
                     Button("Save Details", cls="primary", type="submit"),
                     A(
-                        "Upgrade to Premium",
+                        upgrade_text,
                         href="#",
                         role="button",
                         cls="outline secondary",
+                        style="display: none;" if not show_upgrade else "",
+                        data_target="upgrade-modal",
+                        onclick="toggleModal(event)",
                     ),
                 ),
                 action="/save_details",
@@ -112,6 +130,22 @@ def Dashboard(user):
                         onclick="toggleModal(event)",
                     ),
                 ),
+            ),
+            Dialog(
+                Article(
+                    H3("Coming Soon!"),
+                    P(
+                        "Premium and Human tiers are currently in development."
+                    ),
+                    Footer(
+                        Button(
+                            "Got it!",
+                            cls="primary",
+                            onclick="closeModal(visibleModal)",
+                        ),
+                    ),
+                ),
+                id="upgrade-modal",
             ),
             Dialog(
                 Article(

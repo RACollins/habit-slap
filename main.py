@@ -110,6 +110,7 @@ def post(email: str):
             "is_active": False,
             "magic_link_token": None,
             "magic_link_expiry": None,
+            "tier": "free",  # Add default tier when creating user
         }
         db.create_user(user)
 

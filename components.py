@@ -48,7 +48,7 @@ def CheckMark():
 
 def PricingCard(tier, price, features):
     period = "/email" if tier == "Human" else "/month"
-    is_disabled = tier in ["Pro", "Human"]
+    is_disabled = tier in ["Premium", "Human"]
     
     # Create button element
     button = Button(f"Start {tier}", cls="outline", disabled=is_disabled)

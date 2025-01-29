@@ -160,7 +160,7 @@ def Testimonials():
 
 def FAQ():
     faq_content = {
-        "Who is this for?": "For those who know what to do to improve, "
+        "Who is this for?": "For those who want to improve, know how to do it, "
         "but lack the motivation to do it.\n"
         "Look, if you're overweight, you know how to lose weight, it's not complicated. "
         "But there are so many hucksters out there trying to sell you their magic pills. "
@@ -173,14 +173,16 @@ def FAQ():
         "Simple, no-nonsense, get-out-of-bed-and-make-some-action emails, "
         "sent weekly or daily straight to your inbox.\n"
         "No more excuses, no more procrastination, no more distractions. "
-        "Just get sh*t done!",
-        "How much does it cost?": "It's free! (paid pro plan coming soon!)\n"
+        "Just get sh*t done!\n"
+        "Write that book, learn that language, quit the doomscrolling.\n"
+        "Get emails to keep you on track and accountable.",
+        "How much does it cost?": "It's free! (paid premium plan coming soon!)\n"
         "Sign up with your email and set a goal.\n"
         "Cancel anytime.",
         "Who writes the emails?": "gpt-4o-mini, but working on a custom model, "
         "and even human written emails (coming soon!)",
         "How often will I recieve emails?": "--- Free plan: weekly\n"
-        "--- Pro plan: daily\n"
+        "--- Premium plan: daily\n"
         "--- Human plan: daily\n"
         "You can set the time of delivery in your account settings.",
     }
@@ -209,7 +211,7 @@ def Pricing():
                 "Change goal anytime",
             ],
         },
-        "Pro": {
+        "Premium": {
             "price": "20",
             "features": [
                 "Everything in Free",
@@ -219,7 +221,7 @@ def Pricing():
         "Human": {
             "price": "60",
             "features": [
-                "Everything in Pro",
+                "Everything in Premium",
                 "Human written emails",
             ],
         },
