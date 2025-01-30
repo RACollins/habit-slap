@@ -1,6 +1,7 @@
 from fasthtml.common import *
 from datetime import datetime, timezone, timedelta
 
+MAX_GOAL_LENGTH = 1000
 
 def get_next_sunday_midnight():
     today = datetime.now()
@@ -31,9 +32,7 @@ def Dashboard(user):
 
     # Get tier-specific upgrade button text
     upgrade_text = (
-        "Upgrade to Premium"
-        if user.get("tier") == "free"
-        else "Upgrade to Human"
+        "Upgrade to Premium" if user.get("tier") == "free" else "Upgrade to Human"
     )
     show_upgrade = (
         user.get("tier") != "human"
@@ -89,11 +88,25 @@ def Dashboard(user):
                     max=max_date,
                 ),
                 H2("Adjust your goal", style="margin-top: 1rem"),
-                Textarea(
-                    user.get("goal") or "Set your goal...",
-                    rows=4,
-                    style="margin-bottom: 1rem",
-                    name="goal",
+                Div(
+                    Textarea(
+                        user.get("goal") or "Set your goal...",
+                        rows=4,
+                        style="margin-bottom: 0.5rem",
+                        name="goal",
+                        maxlength=str(MAX_GOAL_LENGTH),
+                        required=True,
+                        oninput="this.nextElementSibling.querySelector('span').textContent = this.value.length",
+                    ),
+                    P(
+                        Span(
+                            len(user.get("goal", "")),
+                            style="font-weight: bold",
+                        ),
+                        "/",
+                        str(MAX_GOAL_LENGTH),
+                        style="text-align: right; font-size: 0.875rem; color: var(--muted-color); margin: 0 0 1rem 0",
+                    ),
                 ),
                 Grid(
                     Button("Save Details", cls="primary", type="submit"),
@@ -134,9 +147,7 @@ def Dashboard(user):
             Dialog(
                 Article(
                     H3("Coming Soon!"),
-                    P(
-                        "Premium and Human tiers are currently in development."
-                    ),
+                    P("Premium and Human tiers are currently in development."),
                     Footer(
                         Button(
                             "Got it!",

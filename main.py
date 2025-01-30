@@ -5,6 +5,25 @@ import yagmail
 import os
 from dotenv import load_dotenv
 from database.dynamo_handler import DynamoHandler
+import subprocess
+import argparse
+import zoneinfo
+
+### Bring in command line arguments
+parser = argparse.ArgumentParser(
+    prog="Habit Slap dev mode",
+    description="Habit Slap switch from prod URL/DB etc. to local when dev mode active",
+)
+parser.add_argument(
+    "-d",
+    "--dev_mode",
+    action="store_true",
+    help="Change to local URL/DB etc. when dev mode active",
+)
+args = parser.parse_args()
+
+site_url = "http://0.0.0.0:5001" if args.dev_mode else "https://habit-slap.vercel.app"
+
 
 ### Load environment variables
 load_dotenv()
@@ -125,7 +144,7 @@ def post(email: str):
         },
     )
 
-    magic_link = f"https://habit-slap.vercel.app/verify_magic_link/{magic_link_token}"
+    magic_link = f"{site_url}/verify_magic_link/{magic_link_token}"
     send_magic_link_email(email, magic_link)
 
     return (
@@ -204,19 +223,50 @@ def get(session):
 
 
 @rt("/complete_signup")
-def post(session, next_email_date: str, goal: str):
+def post(
+    session, goal: str, next_email_day: str, next_email_time: str, timezone_offset: str
+):
     if not session.get("auth"):
         return RedirectResponse("/login")
 
     email = session["auth"]
     try:
-        # Convert local datetime to UTC
-        local_dt = datetime.fromisoformat(next_email_date)
-        if local_dt.tzinfo is None:
-            local_dt = local_dt.astimezone()
+        today = datetime.now()
+        hour, minute = map(int, next_email_time.split(":"))
+        days = [
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        ]
+        target_day_idx = days.index(next_email_day)
+        current_day_idx = today.weekday()
+
+        # Calculate days until next occurrence
+        days_ahead = target_day_idx - current_day_idx
+        if days_ahead <= 0:  # Target day already happened this week
+            days_ahead += 7
+
+        # Create the target datetime in user's timezone
+        target_date = today + timedelta(days=days_ahead)
+        local_dt = datetime.combine(
+            target_date.date(), datetime.strptime(next_email_time, "%H:%M").time()
+        ).replace(tzinfo=zoneinfo.ZoneInfo(timezone_offset))
+
+        # Convert to UTC for storage
         utc_dt = local_dt.astimezone(timezone.utc)
 
-        db.update_user(email, {"next_email_date": utc_dt.isoformat(), "goal": goal})
+        db.update_user(
+            email,
+            {
+                "next_email_date": utc_dt.isoformat(),
+                "goal": goal,
+                "timezone": timezone_offset,  # Store user's timezone for future use
+            },
+        )
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"

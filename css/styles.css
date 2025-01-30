@@ -160,12 +160,25 @@ textarea {
     margin-bottom: 2rem;
 }
 
-/* Button grid */
+/* Update button grid styling */
 article .grid:last-child {
     gap: 1rem;
     display: flex;
     justify-content: space-between;
     margin-top: 1rem;
+}
+
+/* Add media query for mobile screens */
+@media (max-width: 576px) {
+    article .grid:last-child {
+        flex-direction: column;
+    }
+    
+    article .grid:last-child button,
+    article .grid:last-child a {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
 }
 
 /* Remove the previous grid columns media query since we're using flex */
