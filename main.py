@@ -231,7 +231,8 @@ def post(
 
     email = session["auth"]
     try:
-        today = datetime.now()
+        # Get current time in user's timezone
+        now = datetime.now(zoneinfo.ZoneInfo(timezone_offset))
         hour, minute = map(int, next_email_time.split(":"))
         days = [
             "Monday",
@@ -243,15 +244,21 @@ def post(
             "Sunday",
         ]
         target_day_idx = days.index(next_email_day)
-        current_day_idx = today.weekday()
+        current_day_idx = now.weekday()
 
         # Calculate days until next occurrence
         days_ahead = target_day_idx - current_day_idx
-        if days_ahead <= 0:  # Target day already happened this week
+
+        # If it's the same day, check the time
+        if days_ahead == 0:
+            target_time = now.replace(hour=hour, minute=minute, second=0, microsecond=0)
+            if target_time <= now:  # If target time has passed today
+                days_ahead = 7
+        elif days_ahead < 0:  # Target day already happened this week
             days_ahead += 7
 
         # Create the target datetime in user's timezone
-        target_date = today + timedelta(days=days_ahead)
+        target_date = now + timedelta(days=days_ahead)
         local_dt = datetime.combine(
             target_date.date(), datetime.strptime(next_email_time, "%H:%M").time()
         ).replace(tzinfo=zoneinfo.ZoneInfo(timezone_offset))
@@ -264,7 +271,7 @@ def post(
             {
                 "next_email_date": utc_dt.isoformat(),
                 "goal": goal,
-                "timezone": timezone_offset,  # Store user's timezone for future use
+                "timezone": timezone_offset,
             },
         )
         return RedirectResponse("/dashboard", status_code=303)
