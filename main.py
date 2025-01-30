@@ -286,9 +286,7 @@ def post(session):
 
     email = session["auth"]
     try:
-        # Delete the user from the database
         db.delete_user(email)
-        # Clear the session
         del session["auth"]
         return HttpHeader("HX-Redirect", "/")
     except Exception as e:
