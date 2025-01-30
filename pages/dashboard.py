@@ -19,29 +19,20 @@ def get_next_sunday_midnight():
     return next_sunday
 
 
-def Dashboard(user):
-    # Convert UTC time to local time for display using user's stored timezone
+def Dashboard(user, session):
+    # Get next email time in UTC
     next_email = user.get("next_email_date")
-    user_timezone = user.get("timezone")
 
     if next_email:
         utc_dt = datetime.fromisoformat(next_email)
-        if user_timezone:
-            # Use user's stored timezone for conversion
-            local_dt = utc_dt.astimezone(zoneinfo.ZoneInfo(user_timezone))
-        else:
-            # Fallback to system timezone if user timezone not set
-            local_dt = utc_dt.astimezone()
+        # Get timezone from session
+        user_timezone = session.get("timezone", "UTC")
+        # Convert UTC to local time
+        local_dt = utc_dt.astimezone(zoneinfo.ZoneInfo(user_timezone))
+        next_email = local_dt.strftime("%Y-%m-%dT%H:%M")
 
-        next_email = local_dt.strftime(
-            "%Y-%m-%dT%H:%M"
-        )  # Format for datetime-local input
-
-    # Get next Sunday at midnight in user's timezone
-    if user_timezone:
-        now = datetime.now(zoneinfo.ZoneInfo(user_timezone))
-    else:
-        now = datetime.now()
+    # Get next Sunday at midnight in UTC
+    now = datetime.now(timezone.utc)
     days_until_sunday = (6 - now.weekday()) % 7
     if days_until_sunday == 0 and now.time() != datetime.min.time():
         days_until_sunday = 7
@@ -92,9 +83,7 @@ def Dashboard(user):
             Details(
                 Summary("Show email schedule", role="button", cls="outline"),
                 Div(
-                    Span(
-                        f"Next email: {local_dt.strftime('%Y-%m-%d %H:%M') if next_email else 'Not scheduled'}"
-                    ),
+                    Span(next_email if next_email else "Not scheduled"),
                 ),
             ),
             Form(
@@ -106,6 +95,7 @@ def Dashboard(user):
                     style="margin-top: 1rem; margin-bottom: 2rem",
                     max=max_date,
                 ),
+                Input(type="hidden", name="timezone_offset", id="timezone_offset"),
                 H2("Adjust your goal", style="margin-top: 1rem"),
                 Div(
                     Textarea(

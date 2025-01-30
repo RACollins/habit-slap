@@ -69,6 +69,7 @@ bware = Beforeware(
 css_styles = [
     Link(rel="stylesheet", href="/css/styles.css", type="text/css"),
     Script(src="/static/js/modal.js", defer=True),
+    Script(src="/static/js/timezone.js", defer=True),
 ]
 
 
@@ -195,20 +196,26 @@ def post(session):
 @rt("/dashboard")
 def get(session):
     user = db.get_user(session["auth"])
-    return Title("Dashboard"), Container(TopBar(), Dashboard(user))
+    return Title("Dashboard"), Container(TopBar(), Dashboard(user, session))
 
 
 @rt("/save_details")
-def post(session, next_email_date: str, goal: str):
+def post(session, next_email_date: str, goal: str, timezone_offset: str):
     email = session["auth"]
     try:
         # Convert local datetime to UTC
-        local_dt = datetime.fromisoformat(next_email_date)
-        if local_dt.tzinfo is None:
-            local_dt = local_dt.astimezone()
+        local_dt = datetime.fromisoformat(next_email_date).replace(
+            tzinfo=zoneinfo.ZoneInfo(timezone_offset)
+        )
         utc_dt = local_dt.astimezone(timezone.utc)
 
-        db.update_user(email, {"next_email_date": utc_dt.isoformat(), "goal": goal})
+        db.update_user(
+            email,
+            {
+                "next_email_date": utc_dt.isoformat(),
+                "goal": goal,
+            },
+        )
         return RedirectResponse("/dashboard", status_code=303)
     except Exception as e:
         return f"Error saving details: {str(e)}"
@@ -224,15 +231,16 @@ def get(session):
 
 @rt("/complete_signup")
 def post(
-    session, goal: str, next_email_day: str, next_email_time: str, timezone_offset: str
+    session, goal: str, next_email_day: str, next_email_time: str
 ):
     if not session.get("auth"):
         return RedirectResponse("/login")
 
     email = session["auth"]
+    user_timezone = session.get("timezone", "UTC")
     try:
         # Get current time in user's timezone
-        now = datetime.now(zoneinfo.ZoneInfo(timezone_offset))
+        now = datetime.now(zoneinfo.ZoneInfo(user_timezone))
         hour, minute = map(int, next_email_time.split(":"))
         days = [
             "Monday",
@@ -261,7 +269,7 @@ def post(
         target_date = now + timedelta(days=days_ahead)
         local_dt = datetime.combine(
             target_date.date(), datetime.strptime(next_email_time, "%H:%M").time()
-        ).replace(tzinfo=zoneinfo.ZoneInfo(timezone_offset))
+        ).replace(tzinfo=zoneinfo.ZoneInfo(user_timezone))
 
         # Convert to UTC for storage
         utc_dt = local_dt.astimezone(timezone.utc)
@@ -271,7 +279,6 @@ def post(
             {
                 "next_email_date": utc_dt.isoformat(),
                 "goal": goal,
-                "timezone": timezone_offset,
             },
         )
         return RedirectResponse("/dashboard", status_code=303)
@@ -291,6 +298,12 @@ def post(session):
         return HttpHeader("HX-Redirect", "/")
     except Exception as e:
         return f"Error deleting account: {str(e)}"
+
+
+@rt("/set_timezone")
+def post(session, timezone: str):
+    session["timezone"] = timezone
+    return "OK"
 
 
 if __name__ == "__main__":
