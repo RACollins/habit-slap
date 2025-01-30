@@ -1,7 +1,9 @@
 from fasthtml.common import *
 from datetime import datetime, timezone, timedelta
+import zoneinfo
 
 MAX_GOAL_LENGTH = 1000
+
 
 def get_next_sunday_midnight():
     today = datetime.now()
@@ -18,17 +20,35 @@ def get_next_sunday_midnight():
 
 
 def Dashboard(user):
-    # Convert UTC time to local time for display
+    # Convert UTC time to local time for display using user's stored timezone
     next_email = user.get("next_email_date")
+    user_timezone = user.get("timezone")
+
     if next_email:
         utc_dt = datetime.fromisoformat(next_email)
-        local_dt = utc_dt.astimezone()  # Converts to local timezone
+        if user_timezone:
+            # Use user's stored timezone for conversion
+            local_dt = utc_dt.astimezone(zoneinfo.ZoneInfo(user_timezone))
+        else:
+            # Fallback to system timezone if user timezone not set
+            local_dt = utc_dt.astimezone()
+
         next_email = local_dt.strftime(
             "%Y-%m-%dT%H:%M"
         )  # Format for datetime-local input
 
-    # Get next Sunday at midnight in local time
-    max_date = get_next_sunday_midnight().strftime("%Y-%m-%dT%H:%M")
+    # Get next Sunday at midnight in user's timezone
+    if user_timezone:
+        now = datetime.now(zoneinfo.ZoneInfo(user_timezone))
+    else:
+        now = datetime.now()
+    days_until_sunday = (6 - now.weekday()) % 7
+    if days_until_sunday == 0 and now.time() != datetime.min.time():
+        days_until_sunday = 7
+    next_sunday = now + timedelta(days=days_until_sunday)
+    max_date = next_sunday.replace(hour=0, minute=0, second=0, microsecond=0).strftime(
+        "%Y-%m-%dT%H:%M"
+    )
 
     # Get tier-specific upgrade button text
     upgrade_text = (
@@ -84,7 +104,6 @@ def Dashboard(user):
                     value=next_email or "",
                     name="next_email_date",
                     style="margin-top: 1rem; margin-bottom: 2rem",
-                    # step="300",
                     max=max_date,
                 ),
                 H2("Adjust your goal", style="margin-top: 1rem"),
