@@ -29,14 +29,16 @@ def Dashboard(user, session):
         user_timezone = session.get("timezone", "UTC")
         # Convert UTC to local time
         local_dt = utc_dt.astimezone(zoneinfo.ZoneInfo(user_timezone))
-        next_email = local_dt.strftime("%Y-%m-%dT%H:%M")
+        next_email_day_first = local_dt.strftime("%d/%m/%Y %H:%M")
+        next_email_year_first = local_dt.strftime("%Y-%m-%dT%H:%M")
 
-    # Get next Sunday at midnight in UTC
+    # Get next Sunday in user's timezone
     now = datetime.now(timezone.utc)
-    days_until_sunday = (6 - now.weekday()) % 7
-    if days_until_sunday == 0 and now.time() != datetime.min.time():
+    now_local = now.astimezone(zoneinfo.ZoneInfo(user_timezone))
+    days_until_sunday = (6 - now_local.weekday()) % 7
+    if days_until_sunday == 0 and now_local.time() != datetime.min.time():
         days_until_sunday = 7
-    next_sunday = now + timedelta(days=days_until_sunday)
+    next_sunday = now_local + timedelta(days=days_until_sunday)
     max_date = next_sunday.replace(hour=0, minute=0, second=0, microsecond=0).strftime(
         "%Y-%m-%dT%H:%M"
     )
@@ -83,16 +85,21 @@ def Dashboard(user, session):
             Details(
                 Summary("Show email schedule", role="button", cls="outline"),
                 Div(
-                    Span(next_email if next_email else "Not scheduled"),
+                    Span(
+                        next_email_day_first
+                        if next_email_day_first
+                        else "Not scheduled"
+                    ),
                 ),
             ),
             Form(
                 H2("Adjust your email schedule", style="margin-top: 1rem"),
                 Input(
                     type="datetime-local",
-                    value=next_email or "",
+                    value=next_email_year_first or "",
                     name="next_email_date",
                     style="margin-top: 1rem; margin-bottom: 2rem",
+                    min=(now_local + timedelta(minutes=5)).strftime("%Y-%m-%dT%H:%M"),
                     max=max_date,
                 ),
                 H2("Adjust your goal", style="margin-top: 1rem"),
