@@ -200,12 +200,13 @@ def get(session):
 
 
 @rt("/save_details")
-def post(session, next_email_date: str, goal: str, timezone_offset: str):
+def post(session, next_email_date: str, goal: str):
     email = session["auth"]
+    user_timezone = session.get("timezone", "UTC")
     try:
         # Convert local datetime to UTC
         local_dt = datetime.fromisoformat(next_email_date).replace(
-            tzinfo=zoneinfo.ZoneInfo(timezone_offset)
+            tzinfo=zoneinfo.ZoneInfo(user_timezone)
         )
         utc_dt = local_dt.astimezone(timezone.utc)
 

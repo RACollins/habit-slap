@@ -95,7 +95,6 @@ def Dashboard(user, session):
                     style="margin-top: 1rem; margin-bottom: 2rem",
                     max=max_date,
                 ),
-                Input(type="hidden", name="timezone_offset", id="timezone_offset"),
                 H2("Adjust your goal", style="margin-top: 1rem"),
                 Div(
                     Textarea(
