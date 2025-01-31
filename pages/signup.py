@@ -69,13 +69,6 @@ def SignupForm(user):
                     required=True,
                     style="margin-bottom: 2rem",
                 ),
-                Input(type="hidden", name="timezone_offset", id="timezone_offset"),
-                Script(
-                    """
-                    document.getElementById('timezone_offset').value = 
-                        new Intl.DateTimeFormat().resolvedOptions().timeZone;
-                """
-                ),
                 Button("Complete Setup", cls="primary", type="submit"),
                 action="/complete_signup",
                 method="post",
